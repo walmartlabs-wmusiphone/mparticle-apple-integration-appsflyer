@@ -26,7 +26,7 @@ Pod::Spec.new do |s|
     end
 
     s.subspec 'DefaultVersion' do |ss|
-        ss.ios.dependency 'AppsFlyer-SDK', '4.5.3'
+        ss.ios.dependency 'AppsFlyer-SDK', '4.5.5'
         s.subspec_common(ss)
     end
 
