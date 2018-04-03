@@ -7,15 +7,29 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		199A8AC31F7E8EF40077DF1F /* AppsFlyerTracker.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 199A8AC21F7E8EF40077DF1F /* AppsFlyerTracker.framework */; };
+		04EE54D52020DD2C0063CF75 /* mParticle_AppsFlyerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 04EE54D42020DD2C0063CF75 /* mParticle_AppsFlyerTests.m */; };
+		04EE54D72020DD2C0063CF75 /* mParticle_AppsFlyer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DBB8BF891DB9596D00FA55C3 /* mParticle_AppsFlyer.framework */; };
+		04EE54DE2020DE9B0063CF75 /* mParticle_Apple_SDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DBB8BF981DB95AA300FA55C3 /* mParticle_Apple_SDK.framework */; };
 		DBB8BF8E1DB9596D00FA55C3 /* mParticle_AppsFlyer.h in Headers */ = {isa = PBXBuildFile; fileRef = DBB8BF8C1DB9596D00FA55C3 /* mParticle_AppsFlyer.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DBB8BF961DB95A2C00FA55C3 /* MPKitAppsFlyer.h in Headers */ = {isa = PBXBuildFile; fileRef = DBB8BF941DB95A2C00FA55C3 /* MPKitAppsFlyer.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DBB8BF971DB95A2C00FA55C3 /* MPKitAppsFlyer.m in Sources */ = {isa = PBXBuildFile; fileRef = DBB8BF951DB95A2C00FA55C3 /* MPKitAppsFlyer.m */; };
 		DBB8BF991DB95AA300FA55C3 /* mParticle_Apple_SDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DBB8BF981DB95AA300FA55C3 /* mParticle_Apple_SDK.framework */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		04EE54D82020DD2C0063CF75 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DBB8BF801DB9596D00FA55C3 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DBB8BF881DB9596D00FA55C3;
+			remoteInfo = "mParticle-AppsFlyer";
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
-		199A8AC21F7E8EF40077DF1F /* AppsFlyerTracker.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = AppsFlyerTracker.framework; sourceTree = "<group>"; };
+		04EE54D22020DD2C0063CF75 /* mParticle_AppsFlyerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = mParticle_AppsFlyerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		04EE54D42020DD2C0063CF75 /* mParticle_AppsFlyerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = mParticle_AppsFlyerTests.m; sourceTree = "<group>"; };
+		04EE54D62020DD2C0063CF75 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		DBB8BF891DB9596D00FA55C3 /* mParticle_AppsFlyer.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = mParticle_AppsFlyer.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DBB8BF8C1DB9596D00FA55C3 /* mParticle_AppsFlyer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mParticle_AppsFlyer.h; sourceTree = "<group>"; };
 		DBB8BF8D1DB9596D00FA55C3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -25,6 +39,15 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		04EE54CF2020DD2C0063CF75 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				04EE54DE2020DE9B0063CF75 /* mParticle_Apple_SDK.framework in Frameworks */,
+				04EE54D72020DD2C0063CF75 /* mParticle_AppsFlyer.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		DBB8BF851DB9596D00FA55C3 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -37,13 +60,31 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		04EE54D32020DD2C0063CF75 /* mParticle_AppsFlyerTests */ = {
+			isa = PBXGroup;
+			children = (
+				04EE54D42020DD2C0063CF75 /* mParticle_AppsFlyerTests.m */,
+				04EE54D62020DD2C0063CF75 /* Info.plist */,
+			);
+			path = mParticle_AppsFlyerTests;
+			sourceTree = "<group>";
+		};
+		04EE54DD2020DE9B0063CF75 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		DBB8BF7F1DB9596D00FA55C3 = {
 			isa = PBXGroup;
 			children = (
 				199A8AC21F7E8EF40077DF1F /* AppsFlyerTracker.framework */,
 				DBB8BF981DB95AA300FA55C3 /* mParticle_Apple_SDK.framework */,
 				DBB8BF8B1DB9596D00FA55C3 /* mParticle-AppsFlyer */,
+				04EE54D32020DD2C0063CF75 /* mParticle_AppsFlyerTests */,
 				DBB8BF8A1DB9596D00FA55C3 /* Products */,
+				04EE54DD2020DE9B0063CF75 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -51,6 +92,7 @@
 			isa = PBXGroup;
 			children = (
 				DBB8BF891DB9596D00FA55C3 /* mParticle_AppsFlyer.framework */,
+				04EE54D22020DD2C0063CF75 /* mParticle_AppsFlyerTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -81,6 +123,25 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		04EE54D12020DD2C0063CF75 /* mParticle_AppsFlyerTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 04EE54DC2020DD2C0063CF75 /* Build configuration list for PBXNativeTarget "mParticle_AppsFlyerTests" */;
+			buildPhases = (
+				04EE54CE2020DD2C0063CF75 /* Sources */,
+				04EE54CF2020DD2C0063CF75 /* Frameworks */,
+				04EE54D02020DD2C0063CF75 /* Resources */,
+				04EE54DF2020DFDD0063CF75 /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				04EE54D92020DD2C0063CF75 /* PBXTargetDependency */,
+			);
+			name = mParticle_AppsFlyerTests;
+			productName = mParticle_AppsFlyerTests;
+			productReference = 04EE54D22020DD2C0063CF75 /* mParticle_AppsFlyerTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		DBB8BF881DB9596D00FA55C3 /* mParticle-AppsFlyer */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = DBB8BF911DB9596D00FA55C3 /* Build configuration list for PBXNativeTarget "mParticle-AppsFlyer" */;
@@ -108,6 +169,11 @@
 				LastUpgradeCheck = 0800;
 				ORGANIZATIONNAME = mParticle;
 				TargetAttributes = {
+					04EE54D12020DD2C0063CF75 = {
+						CreatedOnToolsVersion = 9.2;
+						DevelopmentTeam = 9RE44VD454;
+						ProvisioningStyle = Automatic;
+					};
 					DBB8BF881DB9596D00FA55C3 = {
 						CreatedOnToolsVersion = 8.0;
 						ProvisioningStyle = Automatic;
@@ -127,11 +193,19 @@
 			projectRoot = "";
 			targets = (
 				DBB8BF881DB9596D00FA55C3 /* mParticle-AppsFlyer */,
+				04EE54D12020DD2C0063CF75 /* mParticle_AppsFlyerTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		04EE54D02020DD2C0063CF75 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		DBB8BF871DB9596D00FA55C3 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -141,7 +215,35 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		04EE54DF2020DFDD0063CF75 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/Carthage/Build/iOS/AppsFlyerTracker.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/mParticle_Apple_SDK.framework",
+			);
+			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/AppsFlyerTracker.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/mParticle_Apple_SDK.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "/usr/local/bin/carthage copy-frameworks";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
+		04EE54CE2020DD2C0063CF75 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				04EE54D52020DD2C0063CF75 /* mParticle_AppsFlyerTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		DBB8BF841DB9596D00FA55C3 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -151,6 +253,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		04EE54D92020DD2C0063CF75 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DBB8BF881DB9596D00FA55C3 /* mParticle-AppsFlyer */;
+			targetProxy = 04EE54D82020DD2C0063CF75 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		199A83D81F7D3A800077DF1F /* QADeployment */ = {
@@ -372,6 +482,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		04EE54DC2020DD2C0063CF75 /* Build configuration list for PBXNativeTarget "mParticle_AppsFlyerTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				04EE54DA2020DD2C0063CF75 /* Debug */,
+				04EE54DB2020DD2C0063CF75 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		DBB8BF831DB9596D00FA55C3 /* Build configuration list for PBXProject "mParticle-AppsFlyer" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
