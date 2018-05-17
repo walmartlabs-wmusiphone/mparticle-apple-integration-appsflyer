@@ -44,13 +44,7 @@ NSString *const kMPKAFCustomerUserId = @"af_customer_user_id";
 static AppsFlyerTracker *appsFlyerTracker = nil;
 static id<AppsFlyerTrackerDelegate> temporaryDelegate = nil;
 
-@interface MPKitAppsFlyer() <AppsFlyerTrackerDelegate> {
-    NSDictionary *temporaryParams;
-    NSDictionary *temporaryAppOpenParams;
-    NSError *temporaryError;
-    void (^completionHandlerCopy)(NSDictionary *, NSError *);
-}
-
+@interface MPKitAppsFlyer() <AppsFlyerTrackerDelegate>
 @end
 
 @implementation MPKitAppsFlyer
@@ -67,7 +61,7 @@ static id<AppsFlyerTrackerDelegate> temporaryDelegate = nil;
             NSLog(@"Warning: AppsFlyer delegate can not be set because it is already in use by kit. \
                   If you'd like to set your own delegate, please do so before you initialize mParticle.\
                   Note: When setting your own delegate, you will not be able to use \
-                  `checkForDeferredDeepLinkWithCompletionHandler`.");
+                  `onAttributionComplete`.");
             return;
         }
         
@@ -83,22 +77,18 @@ static id<AppsFlyerTrackerDelegate> temporaryDelegate = nil;
 }
 
 + (void)load {
-    MPKitRegister *kitRegister = [[MPKitRegister alloc] initWithName:@"AppsFlyer" className:@"MPKitAppsFlyer" startImmediately:YES];
+    MPKitRegister *kitRegister = [[MPKitRegister alloc] initWithName:@"AppsFlyer" className:@"MPKitAppsFlyer"];
     [MParticle registerExtension:kitRegister];
 }
 
-- (instancetype)initWithConfiguration:(NSDictionary *)configuration startImmediately:(BOOL)startImmediately {
-    self = [super init];
+- (MPKitExecStatus *)didFinishLaunchingWithConfiguration:(NSDictionary *)configuration {
+    MPKitExecStatus *execStatus = nil;
     NSString *appleAppId = configuration[afAppleAppId];
     NSString *devKey = configuration[afDevKey];
-    if (!self || !appleAppId || !devKey) {
-        return nil;
+    if (!appleAppId || !devKey) {
+        execStatus = [[MPKitExecStatus alloc] initWithSDKCode:[[self class] kitCode] returnCode:MPKitReturnCodeRequirementsNotMet];
+        return execStatus;
     }
-    
-    temporaryParams = nil;
-    temporaryAppOpenParams = nil;
-    temporaryError = nil;
-    completionHandlerCopy = nil;
 
     appsFlyerTracker = [AppsFlyerTracker sharedTracker];
     appsFlyerTracker.appleAppID = appleAppId;
@@ -112,7 +102,7 @@ static id<AppsFlyerTrackerDelegate> temporaryDelegate = nil;
     }
 
     _configuration = configuration;
-    _started = startImmediately;
+    _started = YES;
 
     BOOL alreadyActive = [[UIApplication sharedApplication] applicationState] == UIApplicationStateActive;
 
@@ -133,7 +123,8 @@ static id<AppsFlyerTrackerDelegate> temporaryDelegate = nil;
         [[MParticle sharedInstance] setIntegrationAttributes:integrationAttributes forKit:[[self class] kitCode]];
     }
 
-    return self;
+    execStatus = [[MPKitExecStatus alloc] initWithSDKCode:[[self class] kitCode] returnCode:MPKitReturnCodeSuccess];
+    return execStatus;
 }
 
 - (nonnull MPKitExecStatus *)didBecomeActive {
@@ -212,7 +203,8 @@ static id<AppsFlyerTrackerDelegate> temporaryDelegate = nil;
     MPKitExecStatus *execStatus;
     
     // If a customer id is available, add it to the commerce event user defined attributes
-    NSString *customerId = _kitApi.userIdentities[@(MPUserIdentityCustomerId)];
+    FilteredMParticleUser *user = [self currentUser];
+    NSString *customerId = [user.userId stringValue];
     if (customerId.length) {
         MPCommerceEvent *surrogateCommerceEvent = [commerceEvent copy];
         surrogateCommerceEvent.userDefinedAttributes[kMPKAFCustomerUserId] = customerId;
@@ -315,7 +307,8 @@ static id<AppsFlyerTrackerDelegate> temporaryDelegate = nil;
 - (nonnull MPKitExecStatus *)logEvent:(nonnull MPEvent *)event {
     
     // If a customer id is available, add it to the event attributes
-    NSString *customerId = _kitApi.userIdentities[@(MPUserIdentityCustomerId)];
+    FilteredMParticleUser *user = [self currentUser];
+    NSString *customerId = [user.userId stringValue];
     if (customerId.length) {
         MPEvent *surrogateEvent = [event copy];
         NSMutableDictionary *mutableInfo = [surrogateEvent.info mutableCopy];
@@ -342,76 +335,56 @@ static id<AppsFlyerTrackerDelegate> temporaryDelegate = nil;
     return error;
 }
 
-- (void)completeWithStoredResults {
-    if (completionHandlerCopy) {
-        if (temporaryError) {
-            completionHandlerCopy(nil, temporaryError);
-            temporaryError = nil;
-        }
-        else {
-            NSMutableDictionary *outerDictionary = [NSMutableDictionary dictionary];
-            if (temporaryParams) {
-                [outerDictionary setObject:temporaryParams forKey:MPKitAppsFlyerConversionResultKey];
-                temporaryParams = nil;
-            }
-            if (temporaryAppOpenParams) {
-                [outerDictionary setObject:temporaryAppOpenParams forKey:MPKitAppsFlyerAppOpenResultKey];
-                temporaryAppOpenParams = nil;
-            }
-            if (outerDictionary.count) {
-                completionHandlerCopy(outerDictionary, nil);
-            }
-        }
-    }
-}
-
-- (nonnull MPKitExecStatus *)checkForDeferredDeepLinkWithCompletionHandler:(void(^ _Nonnull)(NSDictionary * _Nullable linkInfo, NSError * _Nullable error))completionHandler {
-    
-    MPKitExecStatus *execStatus = nil;
-    completionHandlerCopy = [completionHandler copy];
-    
-    if (appsFlyerTracker.delegate != self) {
-        temporaryError = [self errorWithMessage:@"Unable to check for deep link because a custom AppsFlyer delegate has been set."];
-        [self completeWithStoredResults];
-        execStatus = [[MPKitExecStatus alloc] initWithSDKCode:@(MPKitInstanceAppsFlyer) returnCode:MPKitReturnCodeRequirementsNotMet];
-        return execStatus;
-    }
-    
-    if (completionHandlerCopy && (temporaryParams || temporaryAppOpenParams || temporaryError)) {
-        [self completeWithStoredResults];
-    }
-    else {
-        temporaryParams = nil;
-        temporaryAppOpenParams = nil;
-        temporaryError = nil;
-    }
-    
-    execStatus = [[MPKitExecStatus alloc] initWithSDKCode:@(MPKitInstanceAppsFlyer) returnCode:MPKitReturnCodeSuccess];
-    return execStatus;
-}
-
 - (void)onConversionDataReceived:(NSDictionary *)installData {
     if (!installData) {
-        temporaryError = [self errorWithMessage:@"Attribution result was received but was a nil dictionary."];
+        [_kitApi onAttributionCompleteWithResult:nil error:[self errorWithMessage:@"Received nil installData from AppsFlyer"]];
+        return;
     }
-    temporaryParams = installData;
-    [self completeWithStoredResults];
     
+    NSMutableDictionary *outerDictionary = [NSMutableDictionary dictionary];
+    outerDictionary[MPKitAppsFlyerConversionResultKey] = installData;
+
+    MPAttributionResult *attributionResult = [[MPAttributionResult alloc] init];
+    attributionResult.linkInfo = outerDictionary;
+
+    [_kitApi onAttributionCompleteWithResult:attributionResult error:nil];
 }
 
 - (void)onConversionDataRequestFailure:(NSError *)error {
-    temporaryError = error;
-    [self completeWithStoredResults];
+    [_kitApi onAttributionCompleteWithResult:nil error:error];
 }
 
 - (void)onAppOpenAttribution:(NSDictionary *)attributionData {
-    temporaryAppOpenParams = attributionData;
-    [self completeWithStoredResults];
+    if (!attributionData) {
+        [_kitApi onAttributionCompleteWithResult:nil error:[self errorWithMessage:@"Received nil attributionData from AppsFlyer"]];
+        return;
+    }
+    
+    NSMutableDictionary *outerDictionary = [NSMutableDictionary dictionary];
+    outerDictionary[MPKitAppsFlyerAppOpenResultKey] = attributionData;
+
+    MPAttributionResult *attributionResult = [[MPAttributionResult alloc] init];
+    attributionResult.linkInfo = outerDictionary;
+
+    [_kitApi onAttributionCompleteWithResult:attributionResult error:nil];
 }
 
 - (void)onAppOpenAttributionFailure:(NSError *)error {
-    temporaryError = error;
-    [self completeWithStoredResults];
+    [_kitApi onAttributionCompleteWithResult:nil error:error];
+}
+
+- (MPKitAPI *)kitApi {
+    if (_kitApi == nil) {
+        _kitApi = [[MPKitAPI alloc] init];
+    }
+    
+    return _kitApi;
+}
+
+#pragma helper methods
+
+- (FilteredMParticleUser *)currentUser {
+    return [[self kitApi] getCurrentUserWithKit:self];
 }
 
 @end

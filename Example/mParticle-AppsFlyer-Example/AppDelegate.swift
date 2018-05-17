@@ -9,16 +9,29 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
-        MParticle.sharedInstance().start(withKey: "REPLACEME", secret: "REPLACEME")
-        MParticle.sharedInstance().logLevel = .verbose
-        
-        MParticle.sharedInstance().checkForDeferredDeepLink { (linkInfo, error) in
-            if (linkInfo?[MPKitAppsFlyerConversionResultKey] != nil) {
-                print("result: onConversionDataReceived=%@ error=%@", linkInfo ?? "(null)", error ?? "(null)")
-            }else if (linkInfo?[MPKitAppsFlyerAppOpenResultKey] != nil) {
-                print("result: onAppOpenAttribution=%@ error=%@", linkInfo ?? "(null)", error ?? "(null)")
+        let options = MParticleOptions(key: "REPLACEME", secret: "REPLACEME")
+        options.onAttributionComplete = { attributionResult, error in
+            if let swiftError = error {
+                let error = swiftError as NSError
+                if let kitCode = error.userInfo[mParticleKitInstanceKey] {
+                    print("attribution fetching for kitCode=\(kitCode)) failed with error=\(error)");
+                }
+                
+                return;
+            }
+            
+            if let attributionResult = attributionResult {
+                let linkInfo = attributionResult.linkInfo;
+                
+                if let conversionResult = linkInfo[MPKitAppsFlyerConversionResultKey] {
+                    print("result: onConversionDataReceived=\(conversionResult)")
+                } else if let appOpenResult = linkInfo[MPKitAppsFlyerAppOpenResultKey] {
+                    print("result: onAppOpenAttribution=\(appOpenResult)")
+                }
             }
         }
+        MParticle.sharedInstance().start(with: options);
+        MParticle.sharedInstance().logLevel = .verbose
         
         return true
     }
