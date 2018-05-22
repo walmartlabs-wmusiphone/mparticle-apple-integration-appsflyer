@@ -1,2 +1,2 @@
 github "AppsFlyerSDK/AppsFlyerFramework" == 4.8.0
-github "walmartlabs-wmusiphone/mparticle-apple-sdk" "7.3.5-qadeployment"
+github "walmartlabs-wmusiphone/mparticle-apple-sdk" "qadeployment"
