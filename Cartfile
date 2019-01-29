@@ -2,4 +2,4 @@
 # They aren't required as Carthage dependencies.
 
 # binary "https://raw.githubusercontent.com/AppsFlyerSDK/AppsFlyerFramework/master/Carthage.json" ~> 4.8.0
-# github "mparticle/mparticle-apple-sdk" ~> 7.5.0
+# github "mparticle/mparticle-apple-sdk" ~> 7.8.0
