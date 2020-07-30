@@ -1,21 +1,3 @@
-//
-//  MPKitAppsFlyer.m
-//
-//  Copyright 2016 mParticle, Inc.
-//
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  See the License for the specific language governing permissions and
-//  limitations under the License.
-//
-
 #import "MPKitAppsFlyer.h"
 #if defined(__has_include) && __has_include(<AppsFlyerTracker/AppsFlyerTracker.h>)
 #import <AppsFlyerTracker/AppsFlyerTracker.h>
@@ -26,8 +8,8 @@
 #endif
 
 #if TARGET_OS_IOS == 1 && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
-    #import <UserNotifications/UserNotifications.h>
-    #import <UserNotifications/UNUserNotificationCenter.h>
+#import <UserNotifications/UserNotifications.h>
+#import <UserNotifications/UNUserNotificationCenter.h>
 #endif
 
 NSString *const MPKitAppsFlyerConversionResultKey = @"mParticle-AppsFlyer Attribution Result";
@@ -53,6 +35,10 @@ static id<AppsFlyerTrackerDelegate> temporaryDelegate = nil;
 
 - (id)providerKitInstance {
     return appsFlyerTracker;
+}
+
+- (void)setProviderKitInstance:(id)tracker {
+    appsFlyerTracker = tracker;
 }
 
 + (void)setDelegate:(id)delegate {
@@ -89,7 +75,7 @@ static id<AppsFlyerTrackerDelegate> temporaryDelegate = nil;
         execStatus = [[MPKitExecStatus alloc] initWithSDKCode:[[self class] kitCode] returnCode:MPKitReturnCodeRequirementsNotMet];
         return execStatus;
     }
-
+    
     appsFlyerTracker = [AppsFlyerTracker sharedTracker];
     appsFlyerTracker.appleAppID = appleAppId;
     appsFlyerTracker.appsFlyerDevKey = devKey;
@@ -100,29 +86,29 @@ static id<AppsFlyerTrackerDelegate> temporaryDelegate = nil;
     else {
         appsFlyerTracker.delegate = self;
     }
-
+    
     _configuration = configuration;
     _started = YES;
-
+    
     BOOL alreadyActive = [[UIApplication sharedApplication] applicationState] == UIApplicationStateActive;
-
+    
     dispatch_async(dispatch_get_main_queue(), ^{
         if (alreadyActive) {
             [self didBecomeActive];
         }
         NSDictionary *userInfo = @{mParticleKitInstanceKey:[[self class] kitCode]};
-
+        
         [[NSNotificationCenter defaultCenter] postNotificationName:mParticleKitDidBecomeActiveNotification
                                                             object:nil
                                                           userInfo:userInfo];
     });
-
+    
     NSString *appsFlyerUID = (NSString *) [appsFlyerTracker getAppsFlyerUID];
     if (appsFlyerUID){
         NSDictionary<NSString *, NSString *> *integrationAttributes = @{afAppsFlyerIdIntegrationKey:appsFlyerUID};
         [[MParticle sharedInstance] setIntegrationAttributes:integrationAttributes forKit:[[self class] kitCode]];
     }
-
+    
     execStatus = [[MPKitExecStatus alloc] initWithSDKCode:[[self class] kitCode] returnCode:MPKitReturnCodeSuccess];
     return execStatus;
 }
@@ -148,14 +134,8 @@ static id<AppsFlyerTrackerDelegate> temporaryDelegate = nil;
     return execStatus;
 }
 
-- (nonnull MPKitExecStatus *)continueUserActivity:(nonnull NSUserActivity *)userActivity restorationHandler:(void(^ _Nonnull)(NSArray * _Nullable restorableObjects))restorationHandler {
+- (nonnull MPKitExecStatus *)continueUserActivity:(nonnull NSUserActivity *)userActivity restorationHandler:(void(^ _Nonnull)(NSArray * _Nullable restorableObjects))restorationHandler API_AVAILABLE(ios(9.0)){
     [appsFlyerTracker continueUserActivity:userActivity restorationHandler:restorationHandler];
-    MPKitExecStatus *execStatus = [[MPKitExecStatus alloc] initWithSDKCode:@(MPKitInstanceAppsFlyer) returnCode:MPKitReturnCodeSuccess];
-    return execStatus;
-}
-
-- (nonnull MPKitExecStatus *)didUpdateUserActivity:(nonnull NSUserActivity *)userActivity {
-    [appsFlyerTracker didUpdateUserActivity:userActivity];
     MPKitExecStatus *execStatus = [[MPKitExecStatus alloc] initWithSDKCode:@(MPKitInstanceAppsFlyer) returnCode:MPKitReturnCodeSuccess];
     return execStatus;
 }
@@ -167,13 +147,13 @@ static id<AppsFlyerTrackerDelegate> temporaryDelegate = nil;
 }
 
 #if TARGET_OS_IOS == 1 && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
-- (nonnull MPKitExecStatus *)userNotificationCenter:(nonnull UNUserNotificationCenter *)center willPresentNotification:(nonnull UNNotification *)notification {
+- (nonnull MPKitExecStatus *)userNotificationCenter:(nonnull UNUserNotificationCenter *)center willPresentNotification:(nonnull UNNotification *)notification API_AVAILABLE(ios(10.0)){
     [appsFlyerTracker handlePushNotification:notification.request.content.userInfo];
     MPKitExecStatus *execStatus = [[MPKitExecStatus alloc] initWithSDKCode:@(MPKitInstanceAppsFlyer) returnCode:MPKitReturnCodeSuccess];
     return execStatus;
 }
 
-- (nonnull MPKitExecStatus *)userNotificationCenter:(nonnull UNUserNotificationCenter *)center didReceiveNotificationResponse:(nonnull UNNotificationResponse *)response {
+- (nonnull MPKitExecStatus *)userNotificationCenter:(nonnull UNUserNotificationCenter *)center didReceiveNotificationResponse:(nonnull UNNotificationResponse *)response API_AVAILABLE(ios(10.0)){
     [appsFlyerTracker handlePushNotification:response.notification.request.content.userInfo];
     MPKitExecStatus *execStatus = [[MPKitExecStatus alloc] initWithSDKCode:@(MPKitInstanceAppsFlyer) returnCode:MPKitReturnCodeSuccess];
     return execStatus;
@@ -226,7 +206,17 @@ static id<AppsFlyerTrackerDelegate> temporaryDelegate = nil;
     return csvString;
 }
 
-- (nonnull MPKitExecStatus *)logCommerceEvent:(nonnull MPCommerceEvent *)commerceEvent {
+- (nonnull MPKitExecStatus *)logBaseEvent:(nonnull MPBaseEvent *)event {
+    if ([event isKindOfClass:[MPEvent class]]) {
+        return [self routeEvent:(MPEvent *)event];
+    } else if ([event isKindOfClass:[MPCommerceEvent class]]) {
+        return [self routeCommerceEvent:(MPCommerceEvent *)event];
+    } else {
+        return [[MPKitExecStatus alloc] initWithSDKCode:@(MPKitInstanceAppsFlyer) returnCode:MPKitReturnCodeUnavailable];
+    }
+}
+
+- (nonnull MPKitExecStatus *)routeCommerceEvent:(nonnull MPCommerceEvent *)commerceEvent {
     MPKitExecStatus *execStatus;
     
     // If a customer id is available, add it to the commerce event user defined attributes
@@ -234,27 +224,29 @@ static id<AppsFlyerTrackerDelegate> temporaryDelegate = nil;
     NSString *customerId = [user.userId stringValue];
     if (customerId.length) {
         MPCommerceEvent *surrogateCommerceEvent = [commerceEvent copy];
-        surrogateCommerceEvent.userDefinedAttributes[kMPKAFCustomerUserId] = customerId;
+        NSMutableDictionary *mutableInfo = surrogateCommerceEvent.customAttributes ? [surrogateCommerceEvent.customAttributes mutableCopy] : [NSMutableDictionary dictionary];
+        mutableInfo[kMPKAFCustomerUserId] = customerId;
+        surrogateCommerceEvent.customAttributes = mutableInfo;
         commerceEvent = surrogateCommerceEvent;
     }
     
     MPCommerceEventAction action = commerceEvent.action;
-
+    
     if (action == MPCommerceEventActionAddToCart ||
         action == MPCommerceEventActionAddToWishList ||
         action == MPCommerceEventActionCheckout ||
         action == MPCommerceEventActionPurchase)
     {
-        NSMutableDictionary *values = [NSMutableDictionary dictionary];
+        NSMutableDictionary *values = commerceEvent.customAttributes ? [commerceEvent.customAttributes mutableCopy] : [NSMutableDictionary dictionary];
         if (commerceEvent.currency) {
             values[AFEventParamCurrency] = commerceEvent.currency;
         }
-
-        NSString *customerUserId = commerceEvent.userDefinedAttributes[kMPKAFCustomerUserId];
+        
+        NSString *customerUserId = commerceEvent.customAttributes[kMPKAFCustomerUserId];
         if (customerUserId) {
             values[kMPKAFCustomerUserId] = customerUserId;
         }
-
+        
         NSString *appsFlyerEventName = nil;
         if (action == MPCommerceEventActionAddToCart || action == MPCommerceEventActionAddToWishList) {
             NSArray<MPProduct *> *products = commerceEvent.products;
@@ -262,25 +254,25 @@ static id<AppsFlyerTrackerDelegate> temporaryDelegate = nil;
             NSUInteger initialForwardCount = [products count] > 0 ? 0 : 1;
             execStatus = [[MPKitExecStatus alloc] initWithSDKCode:@(MPKitInstanceAppsFlyer) returnCode:MPKitReturnCodeSuccess forwardCount:initialForwardCount];
             appsFlyerEventName = action == MPCommerceEventActionAddToCart ? AFEventAddToCart : AFEventAddToWishlist;
-
+            
             for (MPProduct *product in products) {
                 productValues = [values mutableCopy];
                 if (product.price) {
                     productValues[AFEventParamPrice] = product.price;
                 }
-
+                
                 if (product.quantity) {
                     productValues[AFEventParamQuantity] = product.quantity;
                 }
-
+                
                 if (product.sku) {
                     productValues[AFEventParamContentId] = product.sku;
                 }
-
+                
                 if (product.category) {
                     productValues[AFEventParamContentType] = product.category;
                 }
-
+                
                 [appsFlyerTracker trackEvent:appsFlyerEventName withValues:productValues ? productValues : values];
                 [execStatus incrementForwardCount];
             }
@@ -296,7 +288,7 @@ static id<AppsFlyerTrackerDelegate> temporaryDelegate = nil;
             if (csvString != nil) {
                 values[AFEventParamContentId] = csvString;
             }
-
+            
             MPTransactionAttributes *transactionAttributes = commerceEvent.transactionAttributes;
             if (transactionAttributes.revenue.intValue) {
                 if (action == MPCommerceEventActionPurchase) {
@@ -308,7 +300,7 @@ static id<AppsFlyerTrackerDelegate> temporaryDelegate = nil;
                     values[AFEventParamPrice] = transactionAttributes.revenue;
                 }
             }
-
+            
             [appsFlyerTracker trackEvent:appsFlyerEventName withValues:values];
         }
     }
@@ -316,7 +308,7 @@ static id<AppsFlyerTrackerDelegate> temporaryDelegate = nil;
         execStatus = [[MPKitExecStatus alloc] initWithSDKCode:@(MPKitInstanceAppsFlyer) returnCode:MPKitReturnCodeSuccess forwardCount:0];
         NSArray *expandedInstructions = [commerceEvent expandedInstructions];
         for (MPCommerceEventInstruction *commerceEventInstruction in expandedInstructions) {
-            [self logEvent:commerceEventInstruction.event];
+            [self logBaseEvent:commerceEventInstruction.event];
             [execStatus incrementForwardCount];
         }
     }
@@ -339,21 +331,21 @@ static id<AppsFlyerTrackerDelegate> temporaryDelegate = nil;
     return [NSNumber numberWithInt:quantity];
 }
 
-- (nonnull MPKitExecStatus *)logEvent:(nonnull MPEvent *)event {
+- (nonnull MPKitExecStatus *)routeEvent:(nonnull MPEvent *)event {
     
     // If a customer id is available, add it to the event attributes
     FilteredMParticleUser *user = [self currentUser];
     NSString *customerId = [user.userId stringValue];
     if (customerId.length) {
         MPEvent *surrogateEvent = [event copy];
-        NSMutableDictionary *mutableInfo = [surrogateEvent.info mutableCopy];
+        NSMutableDictionary *mutableInfo = surrogateEvent.customAttributes ? [surrogateEvent.customAttributes mutableCopy] : [NSMutableDictionary dictionary];
         mutableInfo[kMPKAFCustomerUserId] = customerId;
-        surrogateEvent.info = mutableInfo;
+        surrogateEvent.customAttributes = mutableInfo;
         event = surrogateEvent;
     }
     
     NSString *eventName = event.name;
-    NSDictionary *eventValues = event.info;
+    NSDictionary *eventValues = event.customAttributes ? [event.customAttributes mutableCopy] : [NSMutableDictionary dictionary];
     [appsFlyerTracker trackEvent:eventName withValues:eventValues];
     MPKitExecStatus *execStatus = [[MPKitExecStatus alloc] initWithSDKCode:@(MPKitInstanceAppsFlyer) returnCode:MPKitReturnCodeSuccess];
     return execStatus;
@@ -370,7 +362,7 @@ static id<AppsFlyerTrackerDelegate> temporaryDelegate = nil;
     return error;
 }
 
-- (void)onConversionDataReceived:(NSDictionary *)installData {
+- (void)onConversionDataSuccess:(NSDictionary *)installData {
     if (!installData) {
         [_kitApi onAttributionCompleteWithResult:nil error:[self errorWithMessage:@"Received nil installData from AppsFlyer"]];
         return;
@@ -378,14 +370,14 @@ static id<AppsFlyerTrackerDelegate> temporaryDelegate = nil;
     
     NSMutableDictionary *outerDictionary = [NSMutableDictionary dictionary];
     outerDictionary[MPKitAppsFlyerConversionResultKey] = installData;
-
+    
     MPAttributionResult *attributionResult = [[MPAttributionResult alloc] init];
     attributionResult.linkInfo = outerDictionary;
-
+    
     [_kitApi onAttributionCompleteWithResult:attributionResult error:nil];
 }
 
-- (void)onConversionDataRequestFailure:(NSError *)error {
+- (void)onConversionDataFail:(NSError *)error {
     [_kitApi onAttributionCompleteWithResult:nil error:error];
 }
 
@@ -397,10 +389,10 @@ static id<AppsFlyerTrackerDelegate> temporaryDelegate = nil;
     
     NSMutableDictionary *outerDictionary = [NSMutableDictionary dictionary];
     outerDictionary[MPKitAppsFlyerAppOpenResultKey] = attributionData;
-
+    
     MPAttributionResult *attributionResult = [[MPAttributionResult alloc] init];
     attributionResult.linkInfo = outerDictionary;
-
+    
     [_kitApi onAttributionCompleteWithResult:attributionResult error:nil];
 }
 
